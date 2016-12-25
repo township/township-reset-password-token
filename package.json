@@ -1,0 +1,50 @@
+{
+  "name": "township-reset-password-token",
+  "version": "0.0.0",
+  "description": "Manage JWT tokens for resetting passwords",
+  "main": "index.js",
+  "dependencies": {
+    "jsonwebtoken": "^7.2.1",
+    "memdb": "^1.3.1",
+    "subleveldown": "^2.1.0",
+    "township-email": "^1.0.0",
+    "township-token": "^2.2.0",
+    "xtend": "^4.0.1"
+  },
+  "devDependencies": {
+    "appa": "^6.0.0",
+    "documentation": "^4.0.0-beta16",
+    "nodemailer-stub-transport": "^1.1.0",
+    "request": "^2.79.0",
+    "standard": "^8.6.0",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.6.3",
+    "township-accounts": "^4.0.2",
+    "township-email": "^1.0.0"
+  },
+  "scripts": {
+    "deps": "dependency-check . && dependency-check . --unused --no-dev && ncu",
+    "docs:api": "documentation build index.js -f md -o docs/API.md",
+    "docs:build": "npm run docs:api",
+    "lint": "standard",
+    "test:no-lint": "node tests/*.js | tap-spec",
+    "test": "npm run lint && npm run test:no-lint"
+  },
+  "author": "sethvincent",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/township/township-reset-password-token.git"
+  },
+  "keywords": [
+    "township",
+    "authentication",
+    "jwt",
+    "jsonwebtoken",
+    "auth"
+  ],
+  "bugs": {
+    "url": "https://github.com/township/township-reset-password-token/issues"
+  },
+  "homepage": "https://github.com/township/township-reset-password-token#readme"
+}
