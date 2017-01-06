@@ -1,6 +1,6 @@
 {
   "name": "township-reset-password-token",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Manage JWT tokens for resetting passwords",
   "main": "index.js",
   "dependencies": {
