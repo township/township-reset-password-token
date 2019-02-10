@@ -1,6 +1,7 @@
 var assert = require('assert')
 var sublevel = require('subleveldown')
 var jwt = require('jsonwebtoken')
+var createLock = require('level-lock')
 
 /**
 * @name townshipResetPasswordToken
@@ -28,7 +29,7 @@ var jwt = require('jsonwebtoken')
 * })
 */
 module.exports = function townshipResetPasswordToken (db, config) {
-  assert.equal(typeof db, 'object', 'level db is required')
+  assert(typeof db === 'object', 'level db is required')
   config = config || {}
 
   var resetdb = sublevel(db, 'township-reset-password', { valueEncoding: 'json' })
@@ -40,6 +41,10 @@ module.exports = function townshipResetPasswordToken (db, config) {
   var algorithm = config.algorithm
   var secretOrPrivateKey = privateKey || secret
   var secretOrPublicKey = publicKey || secret
+
+  function lock (key, mode) {
+    return createLock(resetdb, key, mode)
+  }
 
   /**
   * create a password reset token
@@ -62,9 +67,16 @@ module.exports = function townshipResetPasswordToken (db, config) {
     delete options.accountKey
     if (algorithm) options.algorithm = algorithm
 
+    const release = lock(accountKey)
+
     jwt.sign({ accountKey: accountKey }, secretOrPrivateKey, options, function (err, token) {
-      if (err) return callback(err)
+      if (err) {
+        release()
+        return callback(err)
+      }
+
       resetdb.put(accountKey, { token: token, accountKey: accountKey }, function (err) {
+        release()
         if (err) return callback(err)
         callback(null, token)
       })
@@ -92,11 +104,21 @@ module.exports = function townshipResetPasswordToken (db, config) {
     delete options.accountKey
     if (algorithm) options.algorithm = algorithm
 
+    const release = lock(accountKey)
+
     resetdb.get(accountKey, function (err, data) {
-      if (err) return callback(new Error('reset token not found'))
-      if (options.token !== data.token) return callback(new Error('invalid reset token'))
+      if (err) {
+        release()
+        return callback(new Error('reset token not found'))
+      }
+
+      if (options.token !== data.token) {
+        release()
+        return callback(new Error('invalid reset token'))
+      }
 
       jwt.verify(options.token, secretOrPublicKey, options, function (err, decoded) {
+        release()
         if (err) return callback(err)
         resetdb.del(accountKey, callback)
       })
